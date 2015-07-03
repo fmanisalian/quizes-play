@@ -12,12 +12,24 @@ exports.load = function(req, res, next, quizId) {
 		).catch(function(error) {next(error);});
 };
 
-//GET /quizes:
+//GET /quizes?search=texto_a_buscar:
 exports.index = function(req, res) {
-	models.Quiz.findAll().then(function(quizes) {
-		res.render('quizes/index', {quizes: quizes});
+	if (req.query.search) {
+		var criterio = ('%' + req.query.search + '%').replace(/ /g, '%');			
+		models.Quiz.findAll({
+			where: ["pregunta like ?", criterio],
+			order: 'pregunta ASC'
+		}).then(function(quizes) {
+			res.render('quizes/index', {quizes: quizes});
+		}
+		).catch(function(error) { next(error);})
 	}
+	else {
+		models.Quiz.findAll().then(function(quizes) {
+			res.render('quizes/index', {quizes: quizes});
+		}
 	).catch(function(error) { next(error);})
+	}	
 };
 
 //GET /quizes/:id
