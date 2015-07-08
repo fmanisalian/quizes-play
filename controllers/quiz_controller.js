@@ -16,7 +16,7 @@ exports.load = function(req, res, next, quizId) {
 };
 
 //GET /quizes?search=texto_a_buscar:
-exports.index = function(req, res) {
+/*exports.index = function(req, res) {
 	if (req.query.search) {
 		var criterio = ('%' + req.query.search + '%').replace(/ /g, '%');			
 		models.Quiz.findAll({
@@ -33,6 +33,27 @@ exports.index = function(req, res) {
 		}
 	).catch(function(error) { next(error);})
 	}	
+};*/
+
+// GET /quizes?search=texto_a_buscar
+// Código más eficiente que, para seleccionar, 
+// no tiene en cuenta si escribimos en minúsculas o mayúsculas:
+exports.index = function(req, res) {
+  	var criterio = "%";
+  	
+  	if(req.query.search != undefined)
+  	{
+  		criterio = "%" + req.query.search + "%";
+  		criterio = criterio.trim().replace(/\s/g,"%");
+  	}
+
+ 	 models.Quiz.findAll({where:["upper(pregunta) like ?", criterio.toUpperCase()], order: 'pregunta ASC'}).
+
+	then(
+  		function(quizes) {
+    		res.render('quizes/index', { quizes: quizes,    errors: []});
+   		}
+  	).catch(function(error) { next(error);})
 };
 
 //GET /quizes/:id
@@ -43,9 +64,19 @@ exports.show = function(req, res) {
 //GET /quizes/:id/answer
 exports.answer = function(req, res) {
 	var resultado = 'Incorrecto';
-	if (req.query.respuesta === req.quiz.respuesta) {
+
+	var rpta_usuario = req.query.respuesta;
+	rpta_usuario = rpta_usuario.trim().toUpperCase();
+
+	var rpta_correcta = req.quiz.respuesta;
+	rpta_correcta = rpta_correcta.toUpperCase();
+
+	if (rpta_usuario === rpta_correcta) { resultado = 'Correcto';}
+
+	/*if (req.query.respuesta === req.quiz.respuesta) {
 			resultado = 'Correcto';
-		}
+		}*/
+
 	res.render ('quizes/answer', {quiz: req.quiz, respuesta: resultado, errors: []});
 };
 
