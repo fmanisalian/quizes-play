@@ -1,3 +1,6 @@
+<%if (quiz.image) {%>
+<p><img class="quiz_img" src="/media/<%= quiz.image %>"></p>
+<%}%>
 <form method="get" action="/quizes/<%= quiz.id %>/answer">
   <br/>
   <p>Pregunta: <%= quiz.pregunta %><br/>Tema: <%= quiz.tema %></p>
